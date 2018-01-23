@@ -17,6 +17,7 @@ Ext.define('com.ca.technicalservices.wsjf_named_weights', {
             [3, 'High']
         ]
     },
+    defaultColumns: [],
     launch: function() {
         var that = this;
 
@@ -27,6 +28,8 @@ Ext.define('com.ca.technicalservices.wsjf_named_weights', {
         that.WSJFScoreField = that.getSetting('WSJFScoreField');
         that.JobSizeField = that.getSetting('JobSizeField');
         that.ShowValuesAfterDecimal = that.getSettingsFields('ShowValuesAfterDecimal');
+
+        that._setDefaultColumns();
 
         this._grid = null;
         this._piCombobox = this.add({
@@ -40,6 +43,42 @@ Ext.define('com.ca.technicalservices.wsjf_named_weights', {
         });
     },
 
+    _setDefaultColumns: function() {
+        this.defaultColumns = [{
+                text: 'Name',
+                dataIndex: 'Name'
+            },
+            {
+                text: 'Time Criticality',
+                dataIndex: this.TimeCriticalityField,
+                editor: this.fieldEditor,
+                renderer: this._valueAsStringRenderer.bind(this)
+            },
+            {
+                text: 'RR/OE Value',
+                dataIndex: this.RROEValueField,
+                editor: this.fieldEditor,
+                renderer: this._valueAsStringRenderer.bind(this)
+            },
+            {
+                text: 'User/Business Value',
+                dataIndex: this.UserBusinessValueField,
+                editor: this.fieldEditor,
+                renderer: this._valueAsStringRenderer.bind(this)
+            },
+            {
+                text: 'Job Size',
+                dataIndex: this.JobSizeField,
+                editor: this.fieldEditor,
+                renderer: this._valueAsStringRenderer.bind(this)
+            },
+            {
+                text: "WSJF Score",
+                dataIndex: this.WSJFScoreField
+            }
+        ]
+    },
+
     _onPICombobox: function() {
         var selectedType = this._piCombobox.getRecord();
         var model = selectedType.get('TypePath');
@@ -48,69 +87,130 @@ Ext.define('com.ca.technicalservices.wsjf_named_weights', {
             this._grid.destroy();
         }
 
-        var store = Ext.create('Rally.data.wsapi.Store', {
-            model: model,
+        Ext.create('Rally.data.wsapi.TreeStoreBuilder').build({
+            models: [model],
             listeners: {
-                load: function(store, data) {
-                    this._calculateScore(data, true);
+                load: function(store) {
+                    var records = store.getRootNode().childNodes;
+                    this._calculateScore(records, true);
                 },
                 update: function(store, rec, modified, opts) {
                     this._calculateScore([rec], false);
                 },
                 scope: this
             },
-            autoLoad: true
+            // autoLoad: true,
+            enableHierarchy: true
+        }).then({
+            success: this._onStoreBuilt,
+            scope: this
         });
-        this._onStoreBuilt(store);
     },
 
     _valueAsStringRenderer: function(value) {
         return this.valueMap[value];
     },
 
-    _onStoreBuilt: function(store) {
+    _onStoreBuilt: function(store, records) {
+        //var records = store.getRootNode().childNodes;
         var that = this;
+        var selectedType = this._piCombobox.getRecord();
+        var modelNames = selectedType.get('TypePath');
 
         var context = this.getContext();
         this._grid = this.add({
-            xtype: 'rallygrid',
+            xtype: 'rallygridboard',
             context: context,
+            modelNames: [modelNames],
+            toggleState: 'grid',
             stateful: false,
-            store: store,
-            enableEditing: true,
-            columnCfgs: [{
-                    text: 'Name',
-                    dataIndex: 'Name'
+            plugins: [{
+                    ptype: 'rallygridboardinlinefiltercontrol',
+                    filterChildren: false,
+                    inlineFilterButtonConfig: {
+                        modelNames: [modelNames],
+                        stateful: true,
+                        stateId: context.getScopedStateId('custom-filter-example'),
+                        inlineFilterPanelConfig: {
+                            quickFilterPanelConfig: {
+                                defaultFields: [
+                                    'ArtifactSearch'
+                                ],
+                                addQuickFilterConfig: {
+                                    whiteListFields: ['Milestones', 'Tags']
+                                }
+                            },
+                            advancedFilterPanelConfig: {
+                                advancedFilterRowsConfig: {
+                                    propertyFieldConfig: {
+                                        whiteListFields: ['Milestones', 'Tags']
+                                    }
+                                }
+                            }
+                        }
+                    }
                 },
                 {
-                    text: 'Time Criticality',
-                    dataIndex: that.TimeCriticalityField,
-                    editor: this.fieldEditor,
-                    renderer: this._valueAsStringRenderer.bind(this)
+                    ptype: 'rallygridboardfieldpicker',
+                    headerPosition: 'left',
+                    modelNames: [modelNames],
+                    stateful: true,
+                    stateId: context.getScopedStateId('columns-example')
                 },
                 {
-                    text: 'RR/OE Value',
-                    dataIndex: that.RROEValueField,
-                    editor: this.fieldEditor,
-                    renderer: this._valueAsStringRenderer.bind(this)
-                },
-                {
-                    text: 'User/Business Value',
-                    dataIndex: that.UserBusinessValueField,
-                    editor: this.fieldEditor,
-                    renderer: this._valueAsStringRenderer.bind(this)
-                },
-                {
-                    text: 'Job Size',
-                    dataIndex: that.JobSizeField,
-                    editor: this.fieldEditor,
-                    renderer: this._valueAsStringRenderer.bind(this)
-                },
-                {
-                    text: "WSJF Score",
-                    dataIndex: that.WSJFScoreField
+                    ptype: 'rallygridboardactionsmenu',
+                    menuItems: [{
+                        text: 'Export...',
+                        handler: function() {
+                            window.location =
+                                Rally.ui.gridboard.Export.buildCsvExportUrl(this.down('rallygridboard').getGridOrBoard());
+
+
+
+                        },
+                        scope: this
+                    }],
+                    buttonConfig: {
+                        iconCls: 'icon-export'
+                    }
                 }
             ],
+            gridConfig: {
+                store: store,
+                enabledEditing: true,
+                alwaysShowDefaultColumns: true,
+                /*
+                columnCfgs: [
+                    'Name',
+                    that.TimeCriticalityField, that.RROEValueField, that.UserBusinessValueField, that.JobSizeField,
+                    this.getSetting("useExecutiveMandateField") === true ? this.getSetting("ExecutiveMandateField") : null,
+                    {
+                        text: "WSJF Score",
+                        dataIndex: that.WSJFScoreField,
+                        editor: null
+                    }
+                ]
+                */
+                listeners: {
+                    scope: that,
+                    beforestaterestore: function(grid, state) {
+                        // Restored columns are greatly simplified and do not persist all column options.
+                        // If any of the restored columns share a name and data index with a default column,
+                        // merge in the default column options (such as editor and renderer).
+                        _.each(state.columns, function(column) {
+                            var matchingDefaultColumn = _.find(this.defaultColumns, function(defaultColumn) {
+                                // TODO (tj) It is possible that two columns with same Name collide. Can't use data index because
+                                // the persisted value is the UUID
+                                if (column.text == defaultColumn.text) {
+                                    return true;
+                                }
+                            });
+                            _.merge(column, matchingDefaultColumn);
+                        }, that);
+                    }
+                },
+                columnCfgs: this.defaultColumns
+            },
             height: this.getHeight()
         });
     },

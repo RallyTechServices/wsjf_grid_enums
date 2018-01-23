@@ -1,7 +1,6 @@
 {
-  "_comment": "This file is used by grunt",
-  "name": "tsabc",
-  "version": "0.2.0",
+  "name": "Technical Services WSJF Named Weights Grid",
+  "version": "0.0.2",
   "scripts": {
     "debug": "grunt debug",
     "debug:watch": "nodemon --exec grunt debug",
