@@ -1,7 +1,7 @@
 {
     "name": "Technical Services WSJF Named Weights Grid",
     "sdk": "2.1",
-    "version": "0.1",
+    "version": "0.0.1",
     "className": "com.ca.technicalservices.wsjf_named_weights",
     "artifact": "",
     "javascript": [
