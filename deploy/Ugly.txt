@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CATS-Technical Services WSJF Named Weights Grid-0.1</title>
+    <!--  (c) 2017 CA Technologies.  All Rights Reserved. -->
+    <!--  Build Date: Tue Jan 23 2018 00:01:49 GMT+0000 (UTC) -->
+
+    <script type="text/javascript">
+        var APP_BUILD_DATE = "Tue Jan 23 2018 00:01:49 GMT+0000 (UTC)";
+        var ARTIFACT = "";
+        var BUILDER  = "ec2-user";
+        var CHECKSUM = 1320177743;
+    </script>
+
+    <script type="text/javascript" src="/apps/2.1/sdk.js"></script>
+    <!-- our highcharts (needed so that we can add patterns)
+    <script type="text/javascript" src="/apps/2.1/lib/analytics/analytics-all.js"></script>
+    -->
+
+
+    <script type="text/javascript">
+        Rally.onReady(function() {
+            var Ext=window.Ext4||window.Ext;Ext.define("com.ca.technicalservices.wsjf_named_weights",{extend:"Rally.app.App",componentCls:"app",valueMap:{1:"Low",2:"Medium",3:"High"},fieldEditor:{xtype:"combobox",store:[[1,"Low"],[2,"Medium"],[3,"High"]]},launch:function(){var a=this;a.TimeCriticalityField=a.getSetting("TimeCriticalityField"),a.RROEValueField=a.getSetting("RROEValueField"),a.UserBusinessValueField=a.getSetting("UserBusinessValueField"),a.WSJFScoreField=a.getSetting("WSJFScoreField"),a.JobSizeField=a.getSetting("JobSizeField"),a.ShowValuesAfterDecimal=a.getSettingsFields("ShowValuesAfterDecimal"),this._grid=null,this._piCombobox=this.add({xtype:"rallyportfolioitemtypecombobox",padding:5,listeners:{select:this._onPICombobox,scope:this}})},_onPICombobox:function(){var a=this._piCombobox.getRecord(),b=a.get("TypePath");null!==this._grid&&this._grid.destroy();var c=Ext.create("Rally.data.wsapi.Store",{model:b,listeners:{load:function(a,b){this._calculateScore(b,!0)},update:function(a,b,c,d){this._calculateScore([b],!1)},scope:this},autoLoad:!0});this._onStoreBuilt(c)},_valueAsStringRenderer:function(a){return this.valueMap[a]},_onStoreBuilt:function(a){var b=this,c=this.getContext();this._grid=this.add({xtype:"rallygrid",context:c,stateful:!1,store:a,enableEditing:!0,columnCfgs:[{text:"Name",dataIndex:"Name"},{text:"Time Criticality",dataIndex:b.TimeCriticalityField,editor:this.fieldEditor,renderer:this._valueAsStringRenderer.bind(this)},{text:"RR/OE Value",dataIndex:b.RROEValueField,editor:this.fieldEditor,renderer:this._valueAsStringRenderer.bind(this)},{text:"User/Business Value",dataIndex:b.UserBusinessValueField,editor:this.fieldEditor,renderer:this._valueAsStringRenderer.bind(this)},{text:"Job Size",dataIndex:b.JobSizeField,editor:this.fieldEditor,renderer:this._valueAsStringRenderer.bind(this)},{text:"WSJF Score",dataIndex:b.WSJFScoreField}],height:this.getHeight()})},_calculateScore:function(a,b){var c=this;Ext.Array.each(a,function(a){var d=c.getSetting("useExecutiveMandateField")===!0?a.data[c.getSetting("ExecutiveMandateField")]:1;d=_.isUndefined(d)||_.isNull(d)||0===d?1:d;var e=a.data[c.JobSizeField];e=_.isUndefined(e)||_.isNull(e)?0:e;var f=a.data[c.TimeCriticalityField];f=_.isUndefined(f)||_.isNull(f)?0:f;var g=a.data[c.RROEValueField];g=_.isUndefined(g)||_.isNull(g)?0:g;var h=a.data[c.UserBusinessValueField];h=_.isUndefined(h)||_.isNull(h)?0:h;var i=a.data[c.WSJFScoreField];i=_.isUndefined(i)||_.isNull(i)?0:i;var j=c.getSetting("ShowValuesAfterDecimal");if(e>0){var k;j?k=Math.floor((h+f+g)*d/e*100)/100:(k=(h+f+g)*d/e,k=Math.round(k)),i!==k&&(a.set(c.WSJFScoreField,k),b&&a.save())}})},getSettingsFields:function(){var a=[{name:"ShowValuesAfterDecimal",xtype:"rallycheckboxfield",label:"Show Values After the Decimal",labelWidth:200},{name:"useExecutiveMandateField",xtype:"rallycheckboxfield",label:"Use Custom Executive Mandate Field",labelWidth:200},{name:"ExecutiveMandateField",xtype:"rallytextfield",label:"Executive Mandate Field",labelWidth:200},{name:"TimeCriticalityField",xtype:"rallytextfield",label:"Time Criticality Field",labelWidth:200},{name:"RROEValueField",xtype:"rallytextfield",label:"RROEValue Field",labelWidth:200},{name:"UserBusinessValueField",xtype:"rallytextfield",label:"User Business Value Field",labelWidth:200},{name:"WSJFScoreField",xtype:"rallytextfield",label:"WSJFScore Field",labelWidth:200},{name:"JobSizeField",xtype:"rallytextfield",label:"Job Size Field",labelWidth:200}];return a},config:{defaultSettings:{ShowValuesAfterDecimal:!1,useExecutiveMandateField:!1,ExecutiveMandateField:"c_ExecutiveMandate",TimeCriticalityField:"TimeCriticality",RROEValueField:"RROEValue",UserBusinessValueField:"UserBusinessValue",WSJFScoreField:"WSJFScore",JobSizeField:"JobSize"}}});
+
+               Rally.launchApp('com.ca.technicalservices.wsjf_named_weights', {
+                   name: 'Technical Services WSJF Named Weights Grid'
+               });
+        });
+    </script>
+
+    <style type="text/css">
+
+.app {
+}
+.tsinfolink {
+    position:absolute;
+    right:0px;
+    width: 14px;
+    height: 14px;
+    border-radius: 7px;
+    text-align: center;
+    color: white;
+    background: #C0C0C0;
+    border-style: solid;
+    border-width: 1px;
+    margin-top: 25px;
+    margin-right: 5px;
+    cursor: pointer;
+}
+    </style>
+
+</head>
+<body></body>
+</html>
