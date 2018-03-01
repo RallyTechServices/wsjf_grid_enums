@@ -21,12 +21,17 @@ Ext.define('com.ca.technicalservices.wsjf_named_weights', {
     launch: function() {
         var that = this;
 
-        //console.log(that.getSettings());
         that.TimeCriticalityField = that.getSetting('TimeCriticalityField');
         that.RROEValueField = that.getSetting('RROEValueField');
         that.UserBusinessValueField = that.getSetting('UserBusinessValueField');
-        that.WSJFScoreField = that.getSetting('WSJFScoreField');
         that.JobSizeField = that.getSetting('JobSizeField');
+
+        that.TimeCriticalityFieldWeights = that._parseWeights(that.getSetting('TimeCriticalityFieldWeights'));
+        that.RROEValueFieldWeights = that._parseWeights(that.getSetting('RROEValueFieldWeights'));
+        that.UserBusinessValueFieldWeights = that._parseWeights(that.getSetting('UserBusinessValueFieldWeights'));
+        that.JobSizeFieldWeights = that._parseWeights(that.getSetting('JobSizeFieldWeights'));
+
+        that.WSJFScoreField = that.getSetting('WSJFScoreField');
         that.ShowValuesAfterDecimal = that.getSettingsFields('ShowValuesAfterDecimal');
 
         that._setDefaultColumns();
@@ -43,6 +48,28 @@ Ext.define('com.ca.technicalservices.wsjf_named_weights', {
         });
     },
 
+    _parseWeights: function(weightsString) {
+        var result;
+        if (weightsString) {
+            result = _.map(weightsString.split(','), function(weight) {
+                var nameValue = weight.split(':');
+                var name = nameValue[0].trim();
+                var weight = parseInt(nameValue[1]);
+                return [weight, name]
+            });
+        }
+        return result;
+    },
+
+    _buildRenderer: function(store) {
+        return function(value) {
+            var valueMap = _.find(store, function(map) {
+                return value == map[0];
+            });
+            return valueMap ? valueMap[1] : "Unknown Value";
+        }
+    },
+
     _setDefaultColumns: function() {
         this.defaultColumns = [{
                 text: 'Name',
@@ -51,26 +78,38 @@ Ext.define('com.ca.technicalservices.wsjf_named_weights', {
             {
                 text: 'Time Criticality',
                 dataIndex: this.TimeCriticalityField,
-                editor: this.fieldEditor,
-                renderer: this._valueAsStringRenderer.bind(this)
+                editor: {
+                    xtype: 'combobox',
+                    store: this.TimeCriticalityFieldWeights
+                },
+                renderer: this._buildRenderer(this.TimeCriticalityFieldWeights)
             },
             {
                 text: 'RR/OE Value',
                 dataIndex: this.RROEValueField,
-                editor: this.fieldEditor,
-                renderer: this._valueAsStringRenderer.bind(this)
+                editor: {
+                    xtype: 'combobox',
+                    store: this.RROEValueFieldWeights
+                },
+                renderer: this._buildRenderer(this.RROEValueFieldWeights)
             },
             {
                 text: 'User/Business Value',
                 dataIndex: this.UserBusinessValueField,
-                editor: this.fieldEditor,
-                renderer: this._valueAsStringRenderer.bind(this)
+                editor: {
+                    xtype: 'combobox',
+                    store: this.UserBusinessValueFieldWeights
+                },
+                renderer: this._buildRenderer(this.UserBusinessValueFieldWeights)
             },
             {
                 text: 'Job Size',
                 dataIndex: this.JobSizeField,
-                editor: this.fieldEditor,
-                renderer: this._valueAsStringRenderer.bind(this)
+                editor: {
+                    xtype: 'combobox',
+                    store: this.JobSizeFieldWeights
+                },
+                renderer: this._buildRenderer(this.JobSizeFieldWeights)
             },
             {
                 text: "WSJF Score",
@@ -291,9 +330,21 @@ Ext.define('com.ca.technicalservices.wsjf_named_weights', {
                 labelWidth: 200
             },
             {
+                name: 'TimeCriticalityFieldWeights',
+                xtype: 'rallytextfield',
+                label: "Time Criticality Field Weights",
+                labelWidth: 200
+            },
+            {
                 name: 'RROEValueField',
                 xtype: 'rallytextfield',
                 label: "RROEValue Field",
+                labelWidth: 200
+            },
+            {
+                name: 'RROEValueFieldWeights',
+                xtype: 'rallytextfield',
+                label: "RROEValue Field Weights",
                 labelWidth: 200
             },
             {
@@ -303,9 +354,9 @@ Ext.define('com.ca.technicalservices.wsjf_named_weights', {
                 labelWidth: 200
             },
             {
-                name: 'WSJFScoreField',
+                name: 'UserBusinessValueFieldWeights',
                 xtype: 'rallytextfield',
-                label: "WSJFScore Field",
+                label: "User Business Value Field Weights",
                 labelWidth: 200
             },
             {
@@ -313,7 +364,19 @@ Ext.define('com.ca.technicalservices.wsjf_named_weights', {
                 xtype: 'rallytextfield',
                 label: "Job Size Field",
                 labelWidth: 200
-            }
+            },
+            {
+                name: 'JobSizeFieldWeights',
+                xtype: 'rallytextfield',
+                label: "Job Size Field Weights",
+                labelWidth: 200
+            },
+            {
+                name: 'WSJFScoreField',
+                xtype: 'rallytextfield',
+                label: "WSJFScore Field",
+                labelWidth: 200
+            },
         ];
 
         return values;
@@ -327,8 +390,13 @@ Ext.define('com.ca.technicalservices.wsjf_named_weights', {
             TimeCriticalityField: 'TimeCriticality',
             RROEValueField: 'RROEValue',
             UserBusinessValueField: 'UserBusinessValue',
+            JobSizeField: 'JobSize',
             WSJFScoreField: 'WSJFScore',
-            JobSizeField: 'JobSize'
+
+            TimeCriticalityFieldWeights: 'Low:1, Medium:10, High:100',
+            RROEValueFieldWeights: 'Low:1, Medium:10, High:100',
+            UserBusinessValueFieldWeights: 'Low:1, Medium:10, High:100',
+            JobSizeFieldWeights: 'Low:1, Medium:10, High:100',
         }
     }
 });
