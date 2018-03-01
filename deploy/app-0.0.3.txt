@@ -3,13 +3,13 @@
 <head>
     <title>CATS-Technical Services WSJF Named Weights Grid-0.0.2</title>
     <!--  (c) 2017 CA Technologies.  All Rights Reserved. -->
-    <!--  Build Date: Tue Jan 23 2018 23:58:57 GMT+0000 (UTC) -->
+    <!--  Build Date: Thu Jan 25 2018 16:35:08 GMT+0000 (UTC) -->
 
     <script type="text/javascript">
-        var APP_BUILD_DATE = "Tue Jan 23 2018 23:58:57 GMT+0000 (UTC)";
+        var APP_BUILD_DATE = "Thu Jan 25 2018 16:35:08 GMT+0000 (UTC)";
         var ARTIFACT = "";
         var BUILDER  = "ec2-user";
-        var CHECKSUM = 2878647269;
+        var CHECKSUM = 2878646321;
     </script>
 
     <script type="text/javascript" src="/apps/2.1/sdk.js"></script>
